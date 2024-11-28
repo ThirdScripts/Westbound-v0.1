@@ -62,7 +62,7 @@ enableCollisions()
     end
 end)
 
-Section:NewButton("Speedhack(PressX)", "ButtonInfo", function()
+Section:NewButton("AntiDie(PressN)", "ButtonInfo", function()
     local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
@@ -125,7 +125,7 @@ local targetCFrame = CFrame.new(-1297.74146, 182.349976, -561.831299, 0.64970672
 game:GetService("UserInputService").InputBegan:Connect(function(input, isProcessed)
     if isProcessed then return end -- Игнорируем события, уже обработанные другими скриптами
     if input.KeyCode == Enum.KeyCode.N then
-        moveTo(targetCFrame, 200) -- Перемещение с высокой скоростью
+        moveTo(targetCFrame, 400) -- Перемещение с высокой скоростью
     end
 end)
 end)
