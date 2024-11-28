@@ -66,6 +66,11 @@ end)
 local Tab = Window:NewTab("Visual")
 local Section = Tab:NewSection("Visual")
 
+-- Кнопка Chams
+Section:NewButton("Chams", "ButtonInfo", function()
+    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/ChamsTeamColor/refs/heads/main/ChamsColorTeam.lua"))()
+end)
+
 -- Кнопка Chinahat
 Section:NewButton("Chinahat", "ButtonInfo", function()
     local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/ChinaHat/refs/heads/main/Chinahat.lua"))()
@@ -77,10 +82,6 @@ Section:NewToggle("Blur", "ToggleInfo", function(state)
     else
         game:GetService("Lighting"):ClearAllChildren()
     end
-end)
--- Кнопка Chams
-Section:NewButton("Chams", "ButtonInfo", function()
-    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/chams/refs/heads/main/chams.lua"))()
 end)
 
 local Tab = Window:NewTab("AutoFarm(Demo)")
