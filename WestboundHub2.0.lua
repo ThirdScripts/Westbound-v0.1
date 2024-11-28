@@ -163,6 +163,26 @@ Section:NewButton("AutoRob", "ButtonInfo", function()
     local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/AutoFlyWestbound/refs/heads/main/AutoRobOpen.lua"))()
 end)
 
+-- Кнопка Chams
+Section:NewButton("AutoRob", "ButtonInfo", function()
+    local Lighting = game:GetService("Lighting")
+
+-- Функция для восстановления стандартных настроек освещения
+local function resetLighting()
+    -- Восстанавливаем стандартные значения
+    Lighting.Ambient = Color3.fromRGB(128, 128, 128)  -- Стандартный ambient (не слишком тёмный, не слишком яркий)
+    Lighting.Brightness = 1  -- Стандартная яркость
+    Lighting.ClockTime = 12  -- Стандартное время дня
+    Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)  -- Стандартный outdoor ambient
+    Lighting.FogEnd = 1000  -- Стандартное значение FogEnd (не слишком много тумана)
+    Lighting.FogStart = 0  -- Стандартный FogStart
+    Lighting.ExposureCompensation = 0  -- Стандартная компенсация экспозиции
+end
+
+-- Восстанавливаем настройки
+resetLighting()
+end)
+
 local Tab = Window:NewTab("KillAll(Premium)")
 local Section = Tab:NewSection("Premium?? - 30 Subscribers")
 
