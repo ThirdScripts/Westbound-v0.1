@@ -10,6 +10,20 @@ Section:NewButton("Aimbot", "ButtonInfo", function()
     local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/Aimbot/refs/heads/main/aimbot.lua"))()
 end)
 
+Section:NewButton("NoLasso", "ButtonInfo", function()
+    while true do
+    local args = {
+        [1] = "BreakFree"
+    }
+
+    game:GetService("ReplicatedStorage"):WaitForChild("GeneralEvents"):WaitForChild("LassoEvents"):FireServer(unpack(args))
+
+    -- Добавляем задержку, чтобы не перегружать систему
+    task.wait(0.1)  -- Задержка в 0.1 секунду перед повтором
+end
+
+end)
+
 Section:NewButton("Speedhack(PressX)", "ButtonInfo", function()
     local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/SpeedhackBypassAntiCheat/refs/heads/main/SpeedHackBypassAnticheat.lua"))()
 end)
