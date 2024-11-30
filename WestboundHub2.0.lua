@@ -234,10 +234,13 @@ getgenv().Toggled = false
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local coneColor = Color3.fromRGB(255, 105, 180) -- Цвет по умолчанию
+local coneColor = Color3.fromRGB(173, 216, 230) -- Нежно-голубой цвет
+local coneCreated = false -- Конус ещё не создан
 
 -- Функция для создания конуса
 local function createCone(character)
+    if not coneColor then return end -- Создаём конус только если цвет выбран
+
     local head = character:FindFirstChild("Head")
     if not head then return end
 
@@ -261,17 +264,21 @@ local function createCone(character)
     cone.Parent = character
     weld.Parent = cone
 
+    -- Добавляем Highlight
     local highlight = Instance.new("Highlight", cone)
-    highlight.FillColor = coneColor -- Используем текущий цвет
+    highlight.FillColor = coneColor
     highlight.FillTransparency = 0.5
-    highlight.OutlineColor = coneColor -- Используем текущий цвет
+    highlight.OutlineColor = coneColor
     highlight.OutlineTransparency = 0
+
+    coneCreated = true -- Помечаем, что конус создан
 end
 
 -- Пересоздаём конус после респавна
 local function onCharacterAdded(character)
-    character:WaitForChild("Head")
-    createCone(character)
+    if coneCreated then -- Если конус уже был создан, пересоздаём
+        createCone(character)
+    end
 end
 
 player.CharacterAdded:Connect(onCharacterAdded)
@@ -282,18 +289,23 @@ if player.Character then
 end
 
 -- ColorPicker
-Section:NewColorPicker("Chinahat", "Color Info", coneColor, function(color)
+Section:NewColorPicker("Color Text", "Color Info", Color3.fromRGB(173, 216, 230), function(color)
     coneColor = color -- Обновляем цвет для конуса
-    if player.Character then
-        -- Пересоздаём конус с новым цветом
-        for _, obj in ipairs(player.Character:GetChildren()) do
-            if obj:IsA("Part") and obj:FindFirstChild("Highlight") then
-                obj:Destroy() -- Удаляем старый конус
+    if player.Character and not coneCreated then
+        createCone(player.Character) -- Создаём конус только после выбора цвета
+    elseif player.Character and coneCreated then
+        -- Обновляем цвет существующего конуса
+        for _, v in ipairs(player.Character:GetChildren()) do
+            if v:IsA("Part") and v:FindFirstChild("Highlight") then
+                local highlight = v:FindFirstChild("Highlight")
+                highlight.FillColor = coneColor
+                highlight.OutlineColor = coneColor
             end
         end
-        createCone(player.Character)
     end
 end)
+
+
 
 
 local Tab = Window:NewTab("AutoFarm(Demo)")
