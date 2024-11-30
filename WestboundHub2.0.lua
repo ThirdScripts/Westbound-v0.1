@@ -289,7 +289,7 @@ if player.Character then
 end
 
 -- ColorPicker
-Section:NewColorPicker("Color Text", "Color Info", Color3.fromRGB(173, 216, 230), function(color)
+Section:NewColorPicker("Chinahat", "Color Info", Color3.fromRGB(173, 216, 230), function(color)
     coneColor = color -- Обновляем цвет для конуса
     if player.Character and not coneCreated then
         createCone(player.Character) -- Создаём конус только после выбора цвета
