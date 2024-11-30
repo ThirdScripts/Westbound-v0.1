@@ -181,7 +181,7 @@ Section:NewToggle("Blur", "ToggleInfo", function(state)
 end)
 
 -- Переключатель улбридж
-Section:NewToggle("ToggleText", "ToggleInfo", function(state)
+Section:NewToggle("Fullbright", "ToggleInfo", function(state)
     if state then
         _G.LightingEnabled = true
 
