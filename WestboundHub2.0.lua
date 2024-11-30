@@ -6,7 +6,7 @@ local Section = Tab:NewSection("Main")
 Section:NewButton("BigHitBox", "ButtonInfo", function()
     local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/nmhb/refs/heads/main/dc.lua"))()
 end)
-Section:NewButton("Aimbot", "ButtonInfo", function()
+Section:NewButton("Aimbot(PressT)", "ButtonInfo", function()
     local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/Aimbot/refs/heads/main/aimbot.lua"))()
 end)
 
