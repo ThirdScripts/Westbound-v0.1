@@ -152,7 +152,17 @@ Section:NewToggle("ToggleText", "ToggleInfo", function(state)
     if state then
         local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/ChamsTeamColor/refs/heads/main/ChamsColorTeam.lua"))()
     else
-        _G.DisableESP()
+        _G.ESP_Enabled = false
+
+for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+    if player.Character then
+        for _, v in ipairs(player.Character:GetChildren()) do
+            if v:IsA("Highlight") then
+                v:Destroy()
+            end
+        end
+    end
+end
     end
 end)
 getgenv().Toggled = false
