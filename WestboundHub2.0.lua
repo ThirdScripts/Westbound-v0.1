@@ -148,10 +148,14 @@ end)
 local Tab = Window:NewTab("Visual")
 local Section = Tab:NewSection("Visual")
 
--- Кнопка Chams
-Section:NewButton("Chams", "ButtonInfo", function()
-    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/ChamsTeamColor/refs/heads/main/ChamsColorTeam.lua"))()
+Section:NewToggle("ToggleText", "ToggleInfo", function(state)
+    if state then
+        local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/ChamsTeamColor/refs/heads/main/ChamsColorTeam.lua"))()
+    else
+        _G.DisableESP()
+    end
 end)
+getgenv().Toggled = false
 
 -- Кнопка Chinahat
 Section:NewButton("Chinahat", "ButtonInfo", function()
