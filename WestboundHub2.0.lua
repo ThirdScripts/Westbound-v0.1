@@ -167,10 +167,7 @@ end
 end)
 getgenv().Toggled = false
 
--- Кнопка Chinahat
-Section:NewButton("Chinahat", "ButtonInfo", function()
-    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/ChinaHat/refs/heads/main/Chinahat.lua"))()
-end)
+
 -- Переключатель Blur
 Section:NewToggle("Blur", "ToggleInfo", function(state)
     if state then
@@ -234,6 +231,70 @@ Lighting.FogEnd = 100000 -- Ограничение на дальность ту�
     end
 end)
 getgenv().Toggled = false
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local coneColor = Color3.fromRGB(255, 105, 180) -- Цвет по умолчанию
+
+-- Функция для создания конуса
+local function createCone(character)
+    local head = character:FindFirstChild("Head")
+    if not head then return end
+
+    local cone = Instance.new("Part")
+    cone.Size = Vector3.new(1, 1, 1)
+    cone.BrickColor = BrickColor.new("White")
+    cone.Transparency = 0.3
+    cone.Anchored = false
+    cone.CanCollide = false
+
+    local mesh = Instance.new("SpecialMesh", cone)
+    mesh.MeshType = Enum.MeshType.FileMesh
+    mesh.MeshId = "rbxassetid://1033714"
+    mesh.Scale = Vector3.new(1.7, 1.1, 1.7)
+
+    local weld = Instance.new("Weld")
+    weld.Part0 = head
+    weld.Part1 = cone
+    weld.C0 = CFrame.new(0, 0.9, 0)
+
+    cone.Parent = character
+    weld.Parent = cone
+
+    local highlight = Instance.new("Highlight", cone)
+    highlight.FillColor = coneColor -- Используем текущий цвет
+    highlight.FillTransparency = 0.5
+    highlight.OutlineColor = coneColor -- Используем текущий цвет
+    highlight.OutlineTransparency = 0
+end
+
+-- Пересоздаём конус после респавна
+local function onCharacterAdded(character)
+    character:WaitForChild("Head")
+    createCone(character)
+end
+
+player.CharacterAdded:Connect(onCharacterAdded)
+
+-- Если персонаж уже существует
+if player.Character then
+    onCharacterAdded(player.Character)
+end
+
+-- ColorPicker
+Section:NewColorPicker("Chinahat", "Color Info", coneColor, function(color)
+    coneColor = color -- Обновляем цвет для конуса
+    if player.Character then
+        -- Пересоздаём конус с новым цветом
+        for _, obj in ipairs(player.Character:GetChildren()) do
+            if obj:IsA("Part") and obj:FindFirstChild("Highlight") then
+                obj:Destroy() -- Удаляем старый конус
+            end
+        end
+        createCone(player.Character)
+    end
+end)
+
 
 local Tab = Window:NewTab("AutoFarm(Demo)")
 local Section = Tab:NewSection("AutofarmGrayRidge")
