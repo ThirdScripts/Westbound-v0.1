@@ -148,7 +148,7 @@ end)
 local Tab = Window:NewTab("Visual")
 local Section = Tab:NewSection("Visual")
 
-Section:NewToggle("ToggleText", "ToggleInfo", function(state)
+Section:NewToggle("Chams", "ToggleInfo", function(state)
     if state then
         local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/ChamsTeamColor/refs/heads/main/ChamsColorTeam.lua"))()
     else
