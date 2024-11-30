@@ -180,33 +180,60 @@ Section:NewToggle("Blur", "ToggleInfo", function(state)
     end
 end)
 
--- Кнопка Chams
-Section:NewButton("FullBright", "ButtonInfo", function()
-    local Lighting = game:GetService("Lighting")
+-- Переключатель улбридж
+Section:NewToggle("ToggleText", "ToggleInfo", function(state)
+    if state then
+        _G.LightingEnabled = true
 
--- Настройка освещения (без изменения времени)
-Lighting.Ambient = Color3.new(1, 1, 1)
-Lighting.Brightness = 2
-Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
-Lighting.FogEnd = 1e10
+local Lighting = game:GetService("Lighting")
 
--- Обновление при изменении Lighting
-Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
+if _G.LightingEnabled then
+    -- Настройка освещения
     Lighting.Ambient = Color3.new(1, 1, 1)
-end)
-
-Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
     Lighting.Brightness = 2
-end)
-
-Lighting:GetPropertyChangedSignal("OutdoorAmbient"):Connect(function()
     Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
-end)
-
-Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
     Lighting.FogEnd = 1e10
+
+    -- Обновление при изменении Lighting
+    Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
+        if _G.LightingEnabled then
+            Lighting.Ambient = Color3.new(1, 1, 1)
+        end
+    end)
+
+    Lighting:GetPropertyChangedSignal("Brightness"):Connect(function()
+        if _G.LightingEnabled then
+            Lighting.Brightness = 2
+        end
+    end)
+
+    Lighting:GetPropertyChangedSignal("OutdoorAmbient"):Connect(function()
+        if _G.LightingEnabled then
+            Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+        end
+    end)
+
+    Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+        if _G.LightingEnabled then
+            Lighting.FogEnd = 1e10
+        end
+    end)
+end
+
+    else
+        _G.LightingEnabled = false
+
+local Lighting = game:GetService("Lighting")
+
+-- Устанавливаем чуть более светлый нейтральный свет
+Lighting.Ambient = Color3.new(0.7, 0.7, 0.7) -- Легкий серый оттенок
+Lighting.Brightness = 1 -- Стандартная яркость
+Lighting.OutdoorAmbient = Color3.new(0.7, 0.7, 0.7) -- Тот же светлый серый
+Lighting.FogEnd = 100000 -- Ограничение на дальность тумана
+
+    end
 end)
-end)
+getgenv().Toggled = false
 
 local Tab = Window:NewTab("AutoFarm(Demo)")
 local Section = Tab:NewSection("AutofarmGrayRidge")
