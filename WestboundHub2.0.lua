@@ -79,10 +79,46 @@ end)
 local speed = 0 -- Начальная скорость (по умолчанию 0)
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
--- Функция для изменения скорости из текстбокса
-Section:NewTextBox("SpeedhackCFrame", "Type here", function(txt)
+-- Функция для настройки перемещения
+local function setupMovement()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    -- Подключаемся к RenderStepped
+    game:GetService("RunService").RenderStepped:Connect(function(deltaTime)
+        if not humanoidRootPart or not humanoidRootPart.Parent then return end
+
+        local moveDirection = Vector3.new(0, 0, 0)
+        local userInputService = game:GetService("UserInputService")
+
+        -- Проверяем нажатие клавиш WASD
+        if userInputService:IsKeyDown(Enum.KeyCode.W) then
+            moveDirection = moveDirection + Vector3.new(0, 0, -1)
+        end
+        if userInputService:IsKeyDown(Enum.KeyCode.S) then
+            moveDirection = moveDirection + Vector3.new(0, 0, 1)
+        end
+        if userInputService:IsKeyDown(Enum.KeyCode.A) then
+            moveDirection = moveDirection + Vector3.new(-1, 0, 0)
+        end
+        if userInputService:IsKeyDown(Enum.KeyCode.D) then
+            moveDirection = moveDirection + Vector3.new(1, 0, 0)
+        end
+
+        -- Нормализуем и перемещаем персонажа
+        if moveDirection.Magnitude > 0 and speed > 0 then
+            moveDirection = moveDirection.Unit
+            local worldDirection = humanoidRootPart.CFrame:VectorToWorldSpace(moveDirection)
+            local newPosition = humanoidRootPart.Position + worldDirection * speed * deltaTime
+
+            -- Перемещаем персонажа без изменения его ориентации
+            humanoidRootPart.CFrame = CFrame.new(newPosition, newPosition + humanoidRootPart.CFrame.LookVector)
+        end
+    end)
+end
+
+-- Добавляем текстбокс для изменения скорости
+Section:NewTextBox("SpeedhackCFrame", "Defolt 0", function(txt)
     local newSpeed = tonumber(txt)
     if newSpeed then
         speed = newSpeed
@@ -92,38 +128,15 @@ Section:NewTextBox("SpeedhackCFrame", "Type here", function(txt)
     end
 end)
 
--- Подключаемся к событию RenderStepped
-game:GetService("RunService").RenderStepped:Connect(function(deltaTime)
-    local moveDirection = Vector3.new(0, 0, 0)
-
-    -- Проверяем нажатие клавиш WASD
-    local userInputService = game:GetService("UserInputService")
-    if userInputService:IsKeyDown(Enum.KeyCode.W) then
-        moveDirection = moveDirection + Vector3.new(0, 0, -1)
-    end
-    if userInputService:IsKeyDown(Enum.KeyCode.S) then
-        moveDirection = moveDirection + Vector3.new(0, 0, 1)
-    end
-    if userInputService:IsKeyDown(Enum.KeyCode.A) then
-        moveDirection = moveDirection + Vector3.new(-1, 0, 0)
-    end
-    if userInputService:IsKeyDown(Enum.KeyCode.D) then
-        moveDirection = moveDirection + Vector3.new(1, 0, 0)
-    end
-
-    -- Нормализуем и перемещаем персонажа
-    if moveDirection.Magnitude > 0 and speed > 0 then
-        moveDirection = moveDirection.Unit
-        local worldDirection = humanoidRootPart.CFrame:VectorToWorldSpace(moveDirection)
-        local newPosition = humanoidRootPart.Position + worldDirection * speed * deltaTime
-
-        -- Перемещаем персонажа без изменения его ориентации
-        humanoidRootPart.CFrame = CFrame.new(newPosition, newPosition + humanoidRootPart.CFrame.LookVector)
-    else
-        -- Оставляем текущую ориентацию, если кнопки не нажаты
-        humanoidRootPart.CFrame = CFrame.new(humanoidRootPart.Position, humanoidRootPart.Position + humanoidRootPart.CFrame.LookVector)
-    end
+-- Обновляем переменные после смерти
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    setupMovement()
 end)
+
+-- Настраиваем движение для текущего персонажа
+setupMovement()
+
 
 --кнопка антидие по нажатию N
 Section:NewButton("AntiDie(PressN)", "ButtonInfo", function()
