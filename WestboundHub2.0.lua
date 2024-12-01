@@ -5,10 +5,7 @@ local Tab = Window:NewTab("Main")
 local Section = Tab:NewSection("Main")
 
 
--- Аимбот по нажатию T
-Section:NewButton("Aimbot(PressT)", "ButtonInfo", function()
-    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/Aimbot/refs/heads/main/aimbot.lua"))()
-end)
+
 
 
 
