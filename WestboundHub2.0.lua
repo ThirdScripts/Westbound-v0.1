@@ -293,6 +293,12 @@ Lighting.FogEnd = 100000 -- Ограничение на дальность ту�
 end)
 getgenv().Toggled = false
 
+-- ESP
+Section:NewButton("ESP", "ButtonInfo", function()
+    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/ESPteamcolor/refs/heads/main/ESP.lua"))()
+end)
+
+
 -- чинахат
 
 local Players = game:GetService("Players")
@@ -367,6 +373,8 @@ Section:NewColorPicker("Chinahat", "Color Info", Color3.fromRGB(173, 216, 230), 
         end
     end
 end)
+
+
 
 
 
