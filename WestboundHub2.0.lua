@@ -3,79 +3,81 @@ local Window = Library.CreateLib("WestbounHackV0.1", "Ocean")
 
 local Tab = Window:NewTab("Main")
 local Section = Tab:NewSection("Main")
-Section:NewButton("BigHitBox", "ButtonInfo", function()
-    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/nmhb/refs/heads/main/dc.lua"))()
-end)
+
+
+-- Аимбот по нажатию T
 Section:NewButton("Aimbot(PressT)", "ButtonInfo", function()
     local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/Aimbot/refs/heads/main/aimbot.lua"))()
 end)
 
-Section:NewButton("NoLasso", "ButtonInfo", function()
-    while true do
-    local args = {
-        [1] = "BreakFree"
-    }
 
-    game:GetService("ReplicatedStorage"):WaitForChild("GeneralEvents"):WaitForChild("LassoEvents"):FireServer(unpack(args))
 
-    -- Добавляем задержку, чтобы не перегружать систему
-    task.wait(0.1)  -- Задержка в 0.1 секунду перед повтором
-end
-
-end)
-
-Section:NewButton("Speedhack(PressX)", "ButtonInfo", function()
-    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/SpeedhackBypassAntiCheat/refs/heads/main/SpeedHackBypassAnticheat.lua"))()
-end)
-
-Section:NewToggle("NoClip", "ToggleInfo", function(state)
-    if state then
-        local player = game.Players.LocalPlayer
+--спидхак по нажатию X
+local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local bodyVelocity = nil
+local userInputService = game:GetService("UserInputService")
 
--- Функция для включения ноуклипа
-local function noclip()
-    for _, part in pairs(character:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = false
-        end
-    end
+local speed = 100  -- Начальная скорость (можно будет изменять через TextBox)
+
+-- Функция для обновления персонажа при возрождении
+local function onCharacterAdded(newCharacter)
+    character = newCharacter
+    humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 end
 
-
--- Функция для выключения ноуклипа (включает столкновения)
-local function clip()
-    for _, part in pairs(character:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = true
-        end
-    end
-end
-
--- Включаем ноуклип вручную
-noclip()
-
--- Чтобы выключить ноуклип вручную, вызовите функцию `clip()`.
-
+-- Функция для включения спидхака
+local function speedHack()
+    if not bodyVelocity then
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+        bodyVelocity.Velocity = humanoidRootPart.CFrame.LookVector * speed
+        bodyVelocity.Parent = humanoidRootPart
     else
-        local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-
--- Функция для включения столкновений
-local function enableCollisions()
-    for _, part in pairs(character:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = true
-        end
+        bodyVelocity.Velocity = humanoidRootPart.CFrame.LookVector * speed
     end
 end
 
--- Выключаем ноуклип, восстанавливаем столкновения
-enableCollisions()
+-- Функция для выключения спидхака
+local function disableSpeedHack()
+    if bodyVelocity then
+        bodyVelocity:Destroy()
+        bodyVelocity = nil
+    end
+end
 
+-- Отслеживание нажатия клавиши X
+userInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.X then
+        speedHack()
     end
 end)
 
+-- Отслеживание отпускания клавиши X
+userInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.X then
+        disableSpeedHack()
+    end
+end)
+
+-- Подписка на событие возрождения
+player.CharacterAdded:Connect(onCharacterAdded)
+
+-- TextBox для изменения скорости
+Section:NewTextBox("Speedhack(PressX)", "TextboxInfo", function(txt)
+    local newSpeed = tonumber(txt)  -- Преобразуем текст в число
+    if newSpeed then
+        speed = newSpeed  -- Обновляем скорость
+        print("Скорость изменена на:", speed)
+    else
+        print("Введите числовое значение скорости!")
+    end
+end)
+
+
+--кнопка антидие по нажатию N
 Section:NewButton("AntiDie(PressN)", "ButtonInfo", function()
     local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -83,7 +85,6 @@ local rootPart = character:WaitForChild("HumanoidRootPart")
 
 local NoclipConnection = nil
 
--- Включение ноуклипа
 local function enableNoclip()
     NoclipConnection = game:GetService("RunService").Stepped:Connect(function()
         for _, part in pairs(character:GetDescendants()) do
@@ -94,7 +95,7 @@ local function enableNoclip()
     end)
 end
 
--- Отключение ноуклипа
+
 local function disableNoclip()
     if NoclipConnection then
         NoclipConnection:Disconnect()
@@ -108,9 +109,9 @@ local function disableNoclip()
     end
 end
 
--- Функция для перемещения
+
 local function moveTo(targetCFrame, speed)
-    enableNoclip() -- Включаем ноуклип
+    enableNoclip() 
     local targetPosition = targetCFrame.Position
     local bodyVelocity = Instance.new("BodyVelocity")
     bodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
@@ -129,22 +130,82 @@ local function moveTo(targetCFrame, speed)
 
     bodyVelocity:Destroy()
     rootPart.CFrame = targetCFrame
-    disableNoclip() -- Выключаем ноуклип
+    disableNoclip() 
 end
 
--- Целевая позиция
+
 local targetCFrame = CFrame.new(-1297.74146, 182.349976, -561.831299, 0.649706721, 1.66775997e-08, -0.760184944, 1.41014356e-09, 1, 2.31440787e-08, 0.760184944, -1.61088334e-08, 0.649706721)
 
--- Обработка нажатия клавиши N
+
 game:GetService("UserInputService").InputBegan:Connect(function(input, isProcessed)
-    if isProcessed then return end -- Игнорируем события, уже обработанные другими скриптами
+    if isProcessed then return end 
     if input.KeyCode == Enum.KeyCode.N then
-        moveTo(targetCFrame, 400) -- Перемещение с высокой скоростью
+        moveTo(targetCFrame, 400) 
     end
 end)
 end)
 
+-- НоуЛассо 
+Section:NewButton("NoLasso", "ButtonInfo", function()
+    while true do
+    local args = {
+        [1] = "BreakFree"
+    }
 
+    game:GetService("ReplicatedStorage"):WaitForChild("GeneralEvents"):WaitForChild("LassoEvents"):FireServer(unpack(args))
+
+    -- Добавляем задержку, чтобы не перегружать систему
+    task.wait(0.1)  -- Задержка в 0.1 секунду перед повтором
+end
+
+end)
+
+-- Переключатель ноуклип
+Section:NewToggle("NoClip", "ToggleInfo", function(state)
+    if state then
+        local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local function noclip()
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+        end
+    end
+end
+
+
+local function clip()
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = true
+        end
+    end
+end
+
+noclip()
+
+
+    else
+        local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local function enableCollisions()
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = true
+        end
+    end
+end
+
+enableCollisions()
+
+    end
+end)
+
+
+
+--Секция визуал
 local Tab = Window:NewTab("Visual")
 local Section = Tab:NewSection("Visual")
 
@@ -177,7 +238,7 @@ Section:NewToggle("Blur", "ToggleInfo", function(state)
     end
 end)
 
--- Переключатель улбридж
+-- Переключатель фулбридж
 Section:NewToggle("Fullbright", "ToggleInfo", function(state)
     if state then
         _G.LightingEnabled = true
@@ -185,13 +246,13 @@ Section:NewToggle("Fullbright", "ToggleInfo", function(state)
 local Lighting = game:GetService("Lighting")
 
 if _G.LightingEnabled then
-    -- Настройка освещения
+  
     Lighting.Ambient = Color3.new(1, 1, 1)
     Lighting.Brightness = 2
     Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
     Lighting.FogEnd = 1e10
 
-    -- Обновление при изменении Lighting
+   
     Lighting:GetPropertyChangedSignal("Ambient"):Connect(function()
         if _G.LightingEnabled then
             Lighting.Ambient = Color3.new(1, 1, 1)
@@ -231,6 +292,8 @@ Lighting.FogEnd = 100000 -- Ограничение на дальность ту�
     end
 end)
 getgenv().Toggled = false
+
+-- чинахат
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
@@ -307,9 +370,11 @@ end)
 
 
 
-
+--Секция автофарм
 local Tab = Window:NewTab("AutoFarm(Demo)")
 local Section = Tab:NewSection("AutofarmGrayRidge")
+
+
 -- Кнопка Chams
 Section:NewButton("AutoFly", "ButtonInfo", function()
     local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/AutoFlyWestbound/refs/heads/main/AutoFly.lua"))()
@@ -319,6 +384,8 @@ Section:NewButton("AutoRob", "ButtonInfo", function()
     local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/AutoFlyWestbound/refs/heads/main/AutoRobOpen.lua"))()
 end)
 
+
+-- секция килл алл
 local Tab = Window:NewTab("KillAll(Premium)")
 local Section = Tab:NewSection("Premium?? - 30 Subscribers")
 
@@ -330,7 +397,6 @@ end)
 Section:NewButton("TpAllCawboys", "ButtonInfo", function()
     local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/west/refs/heads/main/TpAllCawboysNoLocalPlayer.lua"))()
 end)
-
 
 
 
