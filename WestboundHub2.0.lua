@@ -607,31 +607,4 @@ end)
 local Tab = Window:NewTab("GUI Setting")
 local Section = Tab:NewSection("GUI Themes")
 
---1
-Section:NewButton("LightTheme", "ButtonInfo", function()
-    
-end)
---2
-Section:NewButton("ButtonText", "ButtonInfo", function()
-    
-end)
---3
-Section:NewButton("ButtonText", "ButtonInfo", function()
-    
-end)
---4
-Section:NewButton("ButtonText", "ButtonInfo", function()
-    
-end)
---5
-Section:NewButton("ButtonText", "ButtonInfo", function()
-    
-end)
---6
-Section:NewButton("ButtonText", "ButtonInfo", function()
-    
-end)
---7
-Section:NewButton("ButtonText", "ButtonInfo", function()
-    
-end)
+
