@@ -1,16 +1,110 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("WestbounHackV0.1", "Ocean")
+local Window = Library.CreateLib("WestbounHackV1.0", "Ocean")
 
 local Tab = Window:NewTab("Main")
-local Section = Tab:NewSection("Main")
 
--- Аимбот по нажатию T
-Section:NewButton("Aimbot(PressT)", "ButtonInfo", function()
-    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/Aimbot/refs/heads/main/aimbot.lua"))()
+local Section = Tab:NewSection("Aimbot")
+
+-- Аимбот по нажатию рычаг
+Section:NewToggle("Aimbot", "ToggleInfo", function(state)
+    if state then
+        -- Enable Script
+_G.AimBotEnabled = true
+
+local camera = workspace.CurrentCamera
+local players = game:GetService("Players")
+local user = players.LocalPlayer
+local inputService = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+
+local predictionFactor, aimSpeed = 0.042, 10
+local holding = false
+
+if not user then return warn("LocalPlayer не найден!") end
+
+-- Создаем FOV круг
+if not _G.FOVCircle then
+    _G.FOVCircle = Drawing.new("Circle")
+    _G.FOVCircle.Radius, _G.FOVCircle.Filled, _G.FOVCircle.Thickness = 200, false, 1 -- Начальный радиус: 200
+    _G.FOVCircle.Color, _G.FOVCircle.Transparency, _G.FOVCircle.Visible = Color3.new(1, 1, 1), 0.7, true
+end
+
+-- Получение ближайшего игрока
+local function getClosestPlayer()
+    local closest, minDist = nil, math.huge
+    local currentRadius = _G.FOVCircle and _G.FOVCircle.Radius or 200 -- Используем текущий радиус FOV
+    for _, player in pairs(players:GetPlayers()) do
+        if player ~= user and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local head = player.Character:FindFirstChild("Head")
+            local screenPos, onScreen = camera:WorldToScreenPoint(head.Position)
+            local distance = (Vector2.new(screenPos.X, screenPos.Y) - inputService:GetMouseLocation()).Magnitude
+            if onScreen and distance <= currentRadius and distance < minDist then
+                closest, minDist = player, distance
+            end
+        end
+    end
+    return closest
+end
+
+-- Предсказание позиции
+local function predictHead(target)
+    local head = target.Character.Head
+    local velocity = target.Character.HumanoidRootPart.AssemblyLinearVelocity or Vector3.zero
+    return head.Position + velocity * predictionFactor
+end
+
+-- Обработчики ввода
+inputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then holding = true end
+end)
+
+inputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then holding = false end
+end)
+
+-- Основной цикл
+runService.RenderStepped:Connect(function()
+    if not _G.AimBotEnabled then return end
+    if _G.FOVCircle then
+        _G.FOVCircle.Position = inputService:GetMouseLocation()
+    end
+    if holding then
+        local target = getClosestPlayer()
+        if target then
+            local predicted = predictHead(target)
+            camera.CFrame = camera.CFrame:Lerp(CFrame.new(camera.CFrame.Position, predicted), aimSpeed * 0.1)
+        end
+    end
+end)
+    else
+        -- Disable Script
+_G.AimBotEnabled = false -- Отключаем функционал аимбота
+
+-- Удаляем FOV круг, если он существует
+if _G.FOVCircle then
+    _G.FOVCircle:Remove() -- Удаляем объект
+    _G.FOVCircle = nil    -- Очищаем переменную
+end
+
+-- Очищаем глобальные переменные, если требуется
+_G.PredictionFactor = nil
+_G.AimSpeed = nil
+    end
 end)
 
 
+-- Настройка FOV через текстбокс
+Section:NewTextBox("Set FOV Radius", "Enter a number for FOV size", function(txt)
+    local newRadius = tonumber(txt) -- Преобразуем введенный текст в число
+    if newRadius and _G.FOVCircle then
+        _G.FOVCircle.Radius = math.clamp(newRadius, 10, 500) -- Ограничиваем значение от 10 до 500
+        print("FOV Radius set to:", _G.FOVCircle.Radius)
+    else
+        warn("Invalid input! Please enter a number.")
+    end
+end)
 
+local Section = Tab:NewSection("Speedhacks")
 
 --спидхак по нажатию X
 local player = game.Players.LocalPlayer
@@ -137,88 +231,26 @@ end)
 -- Настраиваем движение для текущего персонажа
 setupMovement()
 
-
---кнопка антидие по нажатию N
-Section:NewButton("AntiDie(PressN)", "ButtonInfo", function()
-    local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local rootPart = character:WaitForChild("HumanoidRootPart")
-
-local NoclipConnection = nil
-
-local function enableNoclip()
-    NoclipConnection = game:GetService("RunService").Stepped:Connect(function()
-        for _, part in pairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
-        end
-    end)
-end
+local Section = Tab:NewSection("OtherHacks")
 
 
-local function disableNoclip()
-    if NoclipConnection then
-        NoclipConnection:Disconnect()
-        NoclipConnection = nil
+Section:NewToggle("NoLasso", "ToggleInfo", function(state)
+    if state then
+        _G.ToggleScript = true  -- Глобальная переменная для включения/выключения
+
+while true do
+    if _G.ToggleScript then
+        local args = {
+            [1] = "BreakFree"
+        }
+
+        game:GetService("ReplicatedStorage"):WaitForChild("GeneralEvents"):WaitForChild("LassoEvents"):FireServer(unpack(args))
     end
-
-    for _, part in pairs(character:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = true
-        end
-    end
+    task.wait(0.01)  -- Минимальная задержка для корректной работы цикла 
 end
-
-
-local function moveTo(targetCFrame, speed)
-    enableNoclip() 
-    local targetPosition = targetCFrame.Position
-    local bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
-    bodyVelocity.Velocity = Vector3.zero
-    bodyVelocity.Parent = rootPart
-
-    local distance = (targetPosition - rootPart.Position).Magnitude
-    local travelTime = distance / speed
-    local startTime = tick()
-
-    while tick() - startTime < travelTime do
-        local direction = (targetPosition - rootPart.Position).Unit
-        bodyVelocity.Velocity = direction * speed
-        wait()
+    else
+        _G.ToggleScript = false
     end
-
-    bodyVelocity:Destroy()
-    rootPart.CFrame = targetCFrame
-    disableNoclip() 
-end
-
-
-local targetCFrame = CFrame.new(-1297.74146, 182.349976, -561.831299, 0.649706721, 1.66775997e-08, -0.760184944, 1.41014356e-09, 1, 2.31440787e-08, 0.760184944, -1.61088334e-08, 0.649706721)
-
-
-game:GetService("UserInputService").InputBegan:Connect(function(input, isProcessed)
-    if isProcessed then return end 
-    if input.KeyCode == Enum.KeyCode.N then
-        moveTo(targetCFrame, 400) 
-    end
-end)
-end)
-
--- НоуЛассо 
-Section:NewButton("NoLasso", "ButtonInfo", function()
-    while true do
-    local args = {
-        [1] = "BreakFree"
-    }
-
-    game:GetService("ReplicatedStorage"):WaitForChild("GeneralEvents"):WaitForChild("LassoEvents"):FireServer(unpack(args))
-
-    -- Добавляем задержку, чтобы не перегружать систему
-    task.wait(0.1)  -- Задержка в 0.1 секунду перед повтором
-end
-
 end)
 
 -- Переключатель ноуклип
@@ -268,7 +300,7 @@ end)
 
 --Секция визуал
 local Tab = Window:NewTab("Visual")
-local Section = Tab:NewSection("Visual")
+local Section = Tab:NewSection("Wallhack")
 
 Section:NewToggle("Chams", "ToggleInfo", function(state)
     if state then
@@ -289,6 +321,12 @@ end
 end)
 getgenv().Toggled = false
 
+-- ESP
+Section:NewButton("ESP", "ButtonInfo", function()
+    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/ESPteamcolor/refs/heads/main/ESP.lua"))()
+end)
+
+local Section = Tab:NewSection("Other")
 
 -- Переключатель Blur
 Section:NewToggle("Blur", "ToggleInfo", function(state)
@@ -354,10 +392,7 @@ Lighting.FogEnd = 100000 -- Ограничение на дальность ту�
 end)
 getgenv().Toggled = false
 
--- ESP
-Section:NewButton("ESP", "ButtonInfo", function()
-    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/ESPteamcolor/refs/heads/main/ESP.lua"))()
-end)
+
 
 
 -- чинахат
@@ -455,20 +490,148 @@ end)
 
 
 -- секция килл алл
-local Tab = Window:NewTab("KillAll(Premium)")
-local Section = Tab:NewSection("Premium?? - 30 Subscribers")
+local Tab = Window:NewTab("Mics")
+local Section = Tab:NewSection("KillAll")
 
--- Кнопка TpAllOutlaws
-Section:NewButton("TpAllOutlaws", "ButtonInfo", function()
-    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/west2/refs/heads/main/otlawsNoLocalPlayer.lua"))()
+-- Рычаг TpAllOutlaws
+Section:NewToggle("KillAllOutlaws", "ToggleInfo", function(state)
+    if state then
+        _G.RunScript = true  -- Глобальная переменная для управления скриптом
+
+-- Фиксируем позицию запуска скрипта
+local localPlayer = game.Players.LocalPlayer
+local startPosition = nil
+
+if localPlayer and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    startPosition = localPlayer.Character.HumanoidRootPart.CFrame
+else
+    warn("Скрипт не может определить позицию LocalPlayer.")
+    return
+end
+
+while true do
+    if _G.RunScript then
+        -- Проверяем, что начальная позиция зафиксирована
+        if startPosition then
+            local spacing = 3 -- Расстояние между игроками в линии
+            local positionOffset = 0 -- Начальный сдвиг для первого игрока
+
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                -- Исключаем LocalPlayer и проверяем, что игрок из команды "Outlaws"
+                if player ~= localPlayer and player.Team and player.Team.Name == "Outlaws" then
+                    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        local hrp = player.Character.HumanoidRootPart
+
+                        -- Сбрасываем инерцию
+                        hrp.Velocity = Vector3.zero
+                        hrp.AssemblyLinearVelocity = Vector3.zero
+                        hrp.AssemblyAngularVelocity = Vector3.zero
+
+                        -- Рассчитываем позицию в линии перед сохранённой позицией LocalPlayer
+                        local newPosition = startPosition.Position + (startPosition.LookVector * 5) + Vector3.new(positionOffset, 0, 0)
+
+                        -- Телепортируем игрока
+                        hrp.CFrame = CFrame.new(newPosition)
+
+                        -- Увеличиваем сдвиг для следующего игрока
+                        positionOffset = positionOffset + spacing
+                    end
+                end
+            end
+        end
+    end
+
+    wait(0.1)  -- Минимальная задержка для предотвращения зависания
+end
+    else
+        _G.RunScript = false
+    end
 end)
--- Кнопка TpAllCawboys
-Section:NewButton("TpAllCawboys", "ButtonInfo", function()
-    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ThirdScripts/west/refs/heads/main/TpAllCawboysNoLocalPlayer.lua"))()
+
+-- Рычаг TpAllCawboys
+Section:NewToggle("TpAllCawboys", "ToggleInfo", function(state)
+    if state then
+        _G.RunScript = true  -- Глобальная переменная для управления скриптом
+
+-- Фиксируем позицию запуска скрипта
+local localPlayer = game.Players.LocalPlayer
+local startPosition = nil
+
+if localPlayer and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    startPosition = localPlayer.Character.HumanoidRootPart.CFrame
+else
+    warn("Скрипт не может определить позицию LocalPlayer.")
+    return
+end
+
+while true do
+    if _G.RunScript then
+        -- Проверяем, что начальная позиция зафиксирована
+        if startPosition then
+            local spacing = 3 -- Расстояние между игроками в линии
+            local positionOffset = 0 -- Начальный сдвиг для первого игрока
+
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                -- Исключаем LocalPlayer и проверяем, что игрок из команды "Cowboys"
+                if player ~= localPlayer and player.Team and player.Team.Name == "Cowboys" then
+                    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        local hrp = player.Character.HumanoidRootPart
+
+                        -- Сбрасываем инерцию
+                        hrp.Velocity = Vector3.zero
+                        hrp.AssemblyLinearVelocity = Vector3.zero
+                        hrp.AssemblyAngularVelocity = Vector3.zero
+
+                        -- Рассчитываем позицию в линии перед сохранённой позицией LocalPlayer
+                        local newPosition = startPosition.Position + (startPosition.LookVector * 5) + Vector3.new(positionOffset, 0, 0)
+
+                        -- Телепортируем игрока
+                        hrp.CFrame = CFrame.new(newPosition)
+
+                        -- Увеличиваем сдвиг для следующего игрока
+                        positionOffset = positionOffset + spacing
+                    end
+                end
+            end
+        end
+    end
+
+    wait(0.1)  -- Минимальная задержка для предотвращения зависания
+end
+    else
+        _G.RunScript = false
+    end
 end)
 
+--Gui
+local Tab = Window:NewTab("GUI Setting")
+local Section = Tab:NewSection("GUI Themes")
 
-
-
-
-
+--1
+Section:NewButton("LightTheme", "ButtonInfo", function()
+    
+end)
+--2
+Section:NewButton("ButtonText", "ButtonInfo", function()
+    
+end)
+--3
+Section:NewButton("ButtonText", "ButtonInfo", function()
+    
+end)
+--4
+Section:NewButton("ButtonText", "ButtonInfo", function()
+    
+end)
+--5
+Section:NewButton("ButtonText", "ButtonInfo", function()
+    
+end)
+--6
+Section:NewButton("ButtonText", "ButtonInfo", function()
+    
+end)
+--7
+Section:NewButton("ButtonText", "ButtonInfo", function()
+    
+end)
