@@ -603,8 +603,6 @@ end
     end
 end)
 
---Gui
-local Tab = Window:NewTab("GUI Setting")
-local Section = Tab:NewSection("GUI Themes")
+
 
 
